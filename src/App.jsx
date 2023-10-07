@@ -6,12 +6,14 @@ import "./App.css";
 function App() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState(null);
-  // const [LocationStatus, setLocationStatus] = useState("");
+  const [locationSearch, setLocationSearch] = useState(false);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition((position) => {
-        console.log(position);
+        const string =
+          position.coords.latitude + "," + position.coords.longitude;
+        getWeather(string);
       });
     }
   }, []);
@@ -19,22 +21,28 @@ function App() {
   const handleInput = (e) => {
     setInput(e.target.value);
   };
-  const getWeather = () => {
-    fetch(
-      `http://api.weatherapi.com/v1/current.json?key=3bd2bd0b2f68434a8ed82333232809&q=${input} &aqi=no`
-    )
-      .then((res) => res.json())
+  const getWeather = (str = "") => {
+    if (str || input) {
+      fetch(
+        `http://api.weatherapi.com/v1/current.json?key=3bd2bd0b2f68434a8ed82333232809&q=${
+          str ? str : input
+        }&aqi=no`
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Network Response is not ok");
+          }
+          return res.json();
+        })
 
-      .then((data) => {
-        setResponse(data);
-        console.log(data);
-      });
+        .then((data) => {
+          setResponse(data);
+          setLocationSearch(true);
+          console.log(data);
+        });
+    }
     console.log(input);
   };
-  useEffect(() => {
-    document.createElement("img");
-    document.createElement("h3");
-  }, []);
 
   return (
     <div className="container">
@@ -58,8 +66,20 @@ function App() {
             <span>{response?.current.temp_c} </span>
             <span>°C</span>
           </h3>
-          <p>{response?.current.name} </p>
+          <h3>{response?.location.name} </h3>
         </div>
+
+        {locationSearch && (
+          <>
+            {" "}
+            <img
+              src={response?.current.condition.icon}
+              alt="weather-img"
+              className="img"
+            />
+            <h4>{response?.current.condition.text}</h4>
+          </>
+        )}
       </div>
 
       <div className="bottom-container">
