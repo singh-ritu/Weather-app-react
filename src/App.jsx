@@ -56,7 +56,7 @@ function App() {
             value={input}
             onChange={handleInput}
           />
-          <button className="getWeather-btn" onClick={getWeather}>
+          <button className="getWeather-btn" onClick={() => getWeather()}>
             Get Weather
           </button>
         </div>
